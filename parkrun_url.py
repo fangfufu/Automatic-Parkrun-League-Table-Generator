@@ -69,8 +69,19 @@ def parkrun_url_constructor(loc, eid):
     else:
         return "https://www.parkrun.org.uk/" + loc + "/results/latestresults/"
 
-def get_parkrun_result(loc, eid, club_name):
+def get_parkrun_result(loc: str, club_name: tuple, eid: str) -> list:
+    '''Return the results for a club at a Parkrun
+
+    Args:
+        loc: location of the Parkrun
+        club_name: the name of the club
+        eid: the Parkrun even number
+
+    Returns:
+        The results for a single Parkrun for the clubs specfied.
+    '''
     url = parkrun_url_constructor(loc, eid)
+    print(url)
     html_doc = get_URL_content(url)
     html_tbl = get_result_table(html_doc)
     parsed_tbl = table_to_list(html_tbl)

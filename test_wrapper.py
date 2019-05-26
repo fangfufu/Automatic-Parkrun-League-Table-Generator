@@ -9,6 +9,12 @@ def write_list_as_csv(lst, fn):
         writer = csv.writer(csvfile)
         writer.writerows(lst)
 
+def gen_league_table(loc, start, end):
+    return 0
+
+def league_table_append(loc):
+    return 0
+
 def main():
     # The club name we are checking against
     club_name = ("University of East Anglia Tri Club",

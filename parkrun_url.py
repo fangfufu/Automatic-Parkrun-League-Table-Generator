@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
-Automatic Parkrun League Table Generator
+Parkrun Result Table Parser
+This is a part of Automatic Parkrun League Table Generator
 Dedicated to UEA Triathlon Club
 """
 import csv

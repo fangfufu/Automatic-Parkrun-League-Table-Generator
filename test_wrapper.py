@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import sys
-import pickle
 from parkrun import ParkrunTable
 from util import write_csv, pickle_save, pickle_load
 

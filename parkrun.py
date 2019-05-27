@@ -5,9 +5,7 @@ Parkrun Result Table Downloader
 This is a part of Automatic Parkrun League Table Generator
 Dedicated to UEA Triathlon Club
 """
-import csv
 import requests
-import sys
 from bs4 import BeautifulSoup
 from util import sec_to_timestr, timestr_to_sec
 from datetime import date

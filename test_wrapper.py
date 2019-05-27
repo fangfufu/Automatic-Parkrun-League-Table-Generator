@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 import sys
 import pickle
-from parkrun_table import ParkrunTable
+from parkrun import ParkrunTable
 from util import write_csv, pickle_save, pickle_load
-#from database import gen_parkrun_db
 
 def main():
     # The club name we are checking against

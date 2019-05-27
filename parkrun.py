@@ -10,6 +10,7 @@ import requests
 import sys
 from bs4 import BeautifulSoup
 from util import sec_to_timestr, timestr_to_sec
+from datetime import date
 
 class HTTPError(Exception):
     pass
@@ -17,8 +18,8 @@ class HTTPError(Exception):
 class TableNotFound(Exception):
     pass
 
-class ParkrunTableEntry:
-    def __init__(self, entry):
+class ParkrunEntry:
+    def __init__(self, loc, eid, date, entry):
         self.pos = int(entry[0])
         self.name = entry[1]
         self.time = timestr_to_sec(entry[2])
@@ -32,14 +33,19 @@ class ParkrunTableEntry:
         self.PB = False
         if self.note.find("New") != -1 or self.note.find("First") != -1:
             self.PB = True
+        self.loc = loc
+        self.eid = eid
+        self.date = date
 
     def __repr__(self):
-        txt = "|" + self.name + "\t"
-        txt = txt.expandtabs(20)
+        txt = "|" + self.loc + "\t" + str(self.eid) + "\t"
+        txt = txt.expandtabs(4)
+        txt += self.name + "\t"
+        txt = txt.expandtabs(8)
         txt += self.gender + ": " + str(self.gender_pos) + "\t"
         txt = txt.expandtabs(4)
         txt += self.club + "\t"
-        txt = txt.expandtabs(8)
+        txt = txt.expandtabs(16)
         txt += "PB: " + str(self.PB) + "\t|"
         txt = txt.expandtabs(4)
         return txt
@@ -57,14 +63,6 @@ class ParkrunTable:
         tbl (list): List of Parkrun result entries.
     '''
     def __init__(self, loc, club_name, eid):
-        # Generate the URL
-        if str(eid) != "latest":
-            url = "https://www.parkrun.org.uk/" + loc + \
-                    "/results/weeklyresults/?runSeqNumber=" + str(eid)
-        else:
-            url = "https://www.parkrun.org.uk/" + loc + \
-                    "/results/latestresults/"
-        print(url)
 
         def get_URL_content(url):
             """Get the content of a URL."""
@@ -81,15 +79,7 @@ class ParkrunTable:
                                     str(r.status_code))
             return r.text
 
-        # The html version of the result table
-        html_doc = get_URL_content(url)
-
-        def html_to_tbl(html_doc):
-            soup = BeautifulSoup(html_doc, 'html.parser')
-            html_tbl = soup.find(id="results")
-            if html_tbl == None:
-                raise TableNotFound("Result table not found!")
-
+        def soup_to_tbl(loc, eid, date, soup):
             def html_tbl_to_list_tbl(html_tbl):
                 list_tbl = []
                 for html_row in html_tbl.findAll('tr'):
@@ -99,8 +89,6 @@ class ParkrunTable:
                         row.append(column.text)
                     list_tbl.append(row)
                 return list_tbl
-
-            list_tbl = html_tbl_to_list_tbl(html_tbl)
 
             def filter_by_club(tbl_row):
                 # Club name is always at the 8th column
@@ -112,20 +100,52 @@ class ParkrunTable:
                 else:
                     return False
 
+            html_tbl = soup.find(id="results")
+            if html_tbl == None:
+                raise TableNotFound("Result table not found!")
+
+            list_tbl = html_tbl_to_list_tbl(html_tbl)
             filtered_tbl = list(filter(filter_by_club, list_tbl))
 
             entries = []
             for i in filtered_tbl:
-                entries.append(ParkrunTableEntry(i))
+                entries.append(ParkrunEntry(loc, eid, date, i))
             return entries
 
-        self.tbl = html_to_tbl(html_doc)
+        # Generate the URL
+        if str(eid) != "latest":
+            url = "https://www.parkrun.org.uk/" + loc + \
+                    "/results/weeklyresults/?runSeqNumber=" + str(eid)
+        else:
+            url = "https://www.parkrun.org.uk/" + loc + \
+                    "/results/latestresults/"
+        print(url)
+
+        # The html version of the result table
+        html_doc = get_URL_content(url)
+        soup = BeautifulSoup(html_doc, 'html.parser')
+
+        parkrun_str = str(soup.find("h2"))
+        # Pythonic way of removing all whitespaces
+        parkrun_str = "".join(parkrun_str.split())
+        # Strip the <h2> and </h2> tags, then remove location
+        eid_date_str = parkrun_str[4:-5].split('#')[1]
+        date_str = eid_date_str.rsplit('-')[1]
+
+        # We want to extract the eid from the webpage itself
+        html_eid = int(eid_date_str.split('-')[0])
+
+        self.loc = loc
+        self.eid = html_eid
+        self.date = date(int(date_str.split('/')[2]),
+                         int(date_str.split('/')[1]),
+                         int(date_str.split('/')[0]))
+        self.tbl = soup_to_tbl(self.loc, self.eid, self.date, soup)
 
     def __repr__(self):
-        txt = "|Name\t\t\t\tG: Pos\tClub\t\t\t\t\t\t\t\tPB\t\t\t|\n"
+        txt = "|Loc\t\tEid\tName\t\t\tG: Pos\tClub\t\t\t\t\t\t\t\t\tPB\t\t\t|\n"
         txt = txt.expandtabs(4)
         for i in self.tbl:
             txt += str(i) + "\n"
         txt = txt[:-1]
         return txt
-

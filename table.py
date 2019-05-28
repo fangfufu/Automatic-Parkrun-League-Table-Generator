@@ -54,13 +54,13 @@ class ParkrunTable:
 
     Args:
         loc(str): location of the Parkrun
-        club_name(tuple): the name of the club
+        club_names(tuple): the name of the club
         eid(int): the Parkrun even number
 
     Attributes:
         tbl (list): List of Parkrun result entries.
     '''
-    def __init__(self, loc, club_name, eid):
+    def __init__(self, loc, club_names, eid):
 
         def get_URL_content(url):
             """Get the content of a URL."""
@@ -93,7 +93,7 @@ class ParkrunTable:
                 club = 7
                 if not tbl_row:
                     return False
-                if tbl_row[club] in club_name:
+                if tbl_row[club] in club_names:
                     return True
                 else:
                     return False

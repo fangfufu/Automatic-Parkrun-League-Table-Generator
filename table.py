@@ -5,6 +5,7 @@ Parkrun Result Table Downloader
 This is a part of Automatic Parkrun League Table Generator
 Dedicated to UEA Triathlon Club
 """
+
 import requests
 from bs4 import BeautifulSoup
 from util import sec_to_timestr, timestr_to_sec
@@ -36,16 +37,11 @@ class ParkrunEntry:
         self.date = date
 
     def __repr__(self):
-        txt = "|" + self.loc + "\t" + str(self.eid) + "\t"
-        txt = txt.expandtabs(4)
-        txt += self.name + "\t"
-        txt = txt.expandtabs(8)
-        txt += self.gender + ": " + str(self.gender_pos) + "\t"
-        txt = txt.expandtabs(4)
-        txt += self.club + "\t"
-        txt = txt.expandtabs(16)
-        txt += "PB: " + str(self.PB) + "\t|"
-        txt = txt.expandtabs(4)
+        txt = "|" + self.loc + ", " + str(self.eid) + ", " + str(self.pos)
+        txt += ", " + self.name + ", " + sec_to_timestr(self.time) + ", "
+        txt += str(self.age_grade) + "%, " + self.gender + ": "
+        txt += str(self.gender_pos) + ", " + self.club + ", PB: "
+        txt += str(self.PB) + "|"
         return txt
 
 class ParkrunTable:
@@ -61,7 +57,6 @@ class ParkrunTable:
         tbl (list): List of Parkrun result entries.
     '''
     def __init__(self, loc, club_names, eid):
-
         def get_URL_content(url):
             """Get the content of a URL."""
             # Custom user-agent because Parkrun doesn't like webscraping.
@@ -141,9 +136,7 @@ class ParkrunTable:
         self.tbl = soup_to_tbl(self.loc, self.eid, self.date, soup)
 
     def __repr__(self):
-        txt = "|Loc\t\tEid\tName\t\t\tG: Pos\tClub\t\t\t\t\t\t\t\t\tPB\t\t\t|\n"
-        txt = txt.expandtabs(4)
+        txt = "loc: " + self.loc + ", eid: " + str(self.eid) + "\n"
         for i in self.tbl:
             txt += str(i) + "\n"
-        txt = txt[:-1]
         return txt

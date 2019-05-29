@@ -7,6 +7,8 @@ Dedicated to UEA Triathlon Club
 """
 import pickle
 import csv
+import math
+import datetime
 
 def write_csv(lst, fn):
     with open(fn, 'w') as csvfile:
@@ -23,7 +25,7 @@ def pickle_load(fn):
     return data
 
 def sec_to_timestr(sec):
-    return str(sec/60) + ":" + str(sec%60)
+    return str(datetime.timedelta(seconds=sec))
 
 def timestr_to_sec(timestr):
     return int(timestr.split(':')[0]) * 60 + int(timestr.split(':')[1])

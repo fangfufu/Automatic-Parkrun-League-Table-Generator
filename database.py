@@ -77,6 +77,10 @@ class Athlete:
     def clear(self):
         self.entries.clear()
 
+    def sort_entries(self):
+        self.entries = OrderedDict(sorted(self.entries.items(),
+                                    key = lambda x : x[1].date))
+
     def time(self):
         return [entry.time for entry in self.entries.values()]
 
@@ -121,6 +125,10 @@ class AthleteDB:
     def clear(self):
         self.athletes.clear();
 
+    def sort_athlete_entries(self):
+        for athlete in self.athletes.values():
+            athlete.sort_entries()
+
     def populate(self, parkrun_db):
         for parkrun_table in parkrun_db.tables.values():
             for parkrun_entry in parkrun_table.table:
@@ -128,14 +136,20 @@ class AthleteDB:
                     self.add_athlete(Athlete(parkrun_entry.name,
                                              parkrun_entry.club))
                 self.athletes[parkrun_entry.name].add_entry(parkrun_entry)
+        self.sort_athlete_entries()
 
     def league_table(self):
         '''Print the attendance and PB of each athlete.'''
-        attending = 2
-        PBed = 3
+        attending_score = 2
+        PB_score = 3
         tbl = [["Name", "Club", "Attendance", "PB", "Score"]]
+        tbl_content = [];
         for athlete in self.athletes.values():
-            tbl.append([athlete.name, athlete.club, athlete.attendance(),
-                        athlete.PB(), athlete.attendance() * attending +
-                        athlete.PB() * PBed])
+            tbl_content.append([athlete.name, athlete.club,
+                                athlete.attendance(), athlete.PB(),
+                                athlete.attendance() * attending_score +
+                                athlete.PB() * PB_score])
+        # The 5th column is the parkrun score.
+        tbl_content = sorted(tbl_content, key = lambda x : x[4], reverse=True)
+        tbl.extend(tbl_content)
         return tbl

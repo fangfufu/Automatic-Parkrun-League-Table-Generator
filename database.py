@@ -7,6 +7,7 @@ Dedicated to UEA Triathlon Club
 """
 
 import sys
+from collections import OrderedDict
 from table import ParkrunEntry, ParkrunTable
 
 class WrongAthlete(Exception):
@@ -23,8 +24,8 @@ class ParkrunDB:
 
     def __repr__(self):
         txt = ""
-        for k in self.tables.keys():
-            txt += str(self.tables[k])
+        for k in self.tables.values():
+            txt += str(k)
         return txt
 
     def add(self, eid):
@@ -38,21 +39,22 @@ class ParkrunDB:
         self.tables.clear()
 
     def update(self):
-        tbl = ParkrunTable(self.loc, self.club_names, "latest")
-        if tbl.eid not in self.tables:
-            self.tables[tbl.eid] = tbl
+        table = ParkrunTable(self.loc, self.club_names, "latest")
+        if table.eid not in self.tables:
+            self.tables[table.eid] = table
         else:
             print("ParkrunDB [" + self.loc + "] already up-to-date.",
                   file = sys.stderr)
+        return table.eid
 
 class Athlete:
-    def __init__(self):
+    def __init__(self, name):
         self.name = name
         # We use tuple of (loc, eid) as the key for the dictionary
-        self.entries = {}
+        self.entries = OrderedDict()
 
     def __repr__(self):
-        txt = "Athlete: " + self.name
+        txt = "Athlete: " + self.name + "\n"
         for i in self.entries.values():
             txt += str(i) + "\n"
         txt = txt[:-1]
@@ -89,15 +91,18 @@ class Athlete:
     def attendance(self):
         return len(self.entries)
 
+    # def sort_entries(self):
+    # NOTE: Add function to sort entries by date
+
 class AthleteDB:
     def __init__(self):
         self.athletes = {}
 
     def __repr__(self):
-        return str(list(self.atheletes.keys()))
+        return str(list(self.athletes.keys()))
 
     def add_athlete(self, athlete):
-        if (athlete.name) not in self.athletes:
+        if athlete.name not in self.athletes:
             self.athletes[(athlete.name)] = athlete
         else:
             print("Athlete["+ athlete.name +"] already in the database.",
@@ -105,3 +110,11 @@ class AthleteDB:
 
     def clear(self):
         self.athletes.clear();
+
+    def populate(self, parkrun_db):
+        for parkrun_table in parkrun_db.tables.values():
+            for parkrun_entry in parkrun_table.table:
+                if parkrun_entry.name not in self.athletes:
+                    self.add_athlete(Athlete(parkrun_entry.name))
+                self.athletes[parkrun_entry.name].add_entry(parkrun_entry)
+

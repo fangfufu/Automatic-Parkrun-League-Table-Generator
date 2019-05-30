@@ -37,11 +37,11 @@ class ParkrunEntry:
         self.date = date
 
     def __repr__(self):
-        txt = "|" + self.loc + ", " + str(self.eid) + ", " + str(self.pos)
-        txt += ", " + self.name + ", " + sec_to_timestr(self.time) + ", "
-        txt += str(self.age_grade) + "%, " + self.gender + ": "
-        txt += str(self.gender_pos) + ", " + self.club + ", PB: "
-        txt += str(self.PB) + "|"
+        txt = "|" + str(self.date) + ", " + self.loc + ", " + str(self.eid)
+        txt += ", " + str(self.pos) + ", " + self.name + ", "
+        txt += sec_to_timestr(self.time) + ", " + str(self.age_grade) + "%, "
+        txt += self.gender + ": " + str(self.gender_pos) + ", " + self.club
+        txt += ", PB: " + str(self.PB) + "|"
         return txt
 
 class ParkrunTable:
@@ -54,7 +54,7 @@ class ParkrunTable:
         eid(int): the Parkrun even number
 
     Attributes:
-        tbl (list): List of Parkrun result entries.
+        table (list): List of Parkrun result entries.
     '''
     def __init__(self, loc, club_names, eid):
         def get_URL_content(url):
@@ -72,36 +72,36 @@ class ParkrunTable:
                                     str(r.status_code))
             return r.text
 
-        def soup_to_tbl(loc, eid, date, soup):
-            def html_tbl_to_list_tbl(html_tbl):
-                list_tbl = []
-                for html_row in html_tbl.findAll('tr'):
+        def soup_to_table(loc, eid, date, soup):
+            def html_table_to_list_table(html_table):
+                list_table = []
+                for html_row in html_table.findAll('tr'):
                     html_col = html_row.findAll('td')
                     row = []
                     for column in html_col:
                         row.append(column.text)
-                    list_tbl.append(row)
-                return list_tbl
+                    list_table.append(row)
+                return list_table
 
-            def filter_by_club(tbl_row):
+            def filter_by_club(table_row):
                 # Club name is always at the 8th column
                 club = 7
-                if not tbl_row:
+                if not table_row:
                     return False
-                if tbl_row[club] in club_names:
+                if table_row[club] in club_names:
                     return True
                 else:
                     return False
 
-            html_tbl = soup.find(id="results")
-            if html_tbl == None:
+            html_table = soup.find(id="results")
+            if html_table == None:
                 raise TableNotFound("Result table not found!")
 
-            list_tbl = html_tbl_to_list_tbl(html_tbl)
-            filtered_tbl = list(filter(filter_by_club, list_tbl))
+            list_table = html_table_to_list_table(html_table)
+            filtered_table = list(filter(filter_by_club, list_table))
 
             entries = []
-            for i in filtered_tbl:
+            for i in filtered_table:
                 entries.append(ParkrunEntry(loc, eid, date, i))
             return entries
 
@@ -133,10 +133,10 @@ class ParkrunTable:
         self.date = date(int(date_str.split('/')[2]),
                          int(date_str.split('/')[1]),
                          int(date_str.split('/')[0]))
-        self.tbl = soup_to_tbl(self.loc, self.eid, self.date, soup)
+        self.table = soup_to_table(self.loc, self.eid, self.date, soup)
 
     def __repr__(self):
         txt = "loc: " + self.loc + ", eid: " + str(self.eid) + "\n"
-        for i in self.tbl:
+        for i in self.table:
             txt += str(i) + "\n"
         return txt

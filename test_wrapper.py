@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
+# Scrap code
 #import sys
-#from table import ParkrunTable
 #print("Arguments are: " + str(sys.argv))
 #db = ParkrunDB("norwich", club_names, 440, 460)
 #club_names = ("University of East Anglia Tri Club",

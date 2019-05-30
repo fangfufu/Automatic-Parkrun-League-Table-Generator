@@ -13,6 +13,9 @@ from table import ParkrunEntry, ParkrunTable
 class WrongAthlete(Exception):
     pass
 
+class AthleteDoesNotExist(Exception):
+    pass
+
 class ParkrunDB:
     def __init__(self, loc, club_names, eid_start, eid_end):
         self.loc = loc
@@ -108,6 +111,12 @@ class AthleteDB:
             print("Athlete["+ athlete.name +"] already in the database.",
                   file=sys.stderr)
 
+    def del_athlete(self, athlete_name):
+        if athlete_name in self.athletes:
+            athletes.pop(athlete_name, None)
+        else:
+            raise AthleteDoesNotExist("Athlete[" + athlete_name +
+                                      "] does not exist.")
     def clear(self):
         self.athletes.clear();
 

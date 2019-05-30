@@ -6,6 +6,7 @@ I will complete the README when I can be bothered. Basically, the idea of Parkru
 
 ## TODO
  - A more thorough README
+ - Database slicing, so I get to process a subset of the database
  - Implement + 3pts for the fastest UEA Tri/Athletics Male and Female at each Parkrun.
  - Sort the output table
  - Individual athlete performance analysis

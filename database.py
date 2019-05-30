@@ -51,8 +51,9 @@ class ParkrunDB:
         return table.eid
 
 class Athlete:
-    def __init__(self, name):
+    def __init__(self, name, club):
         self.name = name
+        self.club = club
         # We use tuple of (loc, eid) as the key for the dictionary
         self.entries = OrderedDict()
 
@@ -99,7 +100,7 @@ class Athlete:
 
 class AthleteDB:
     def __init__(self):
-        self.athletes = {}
+        self.athletes = OrderedDict()
 
     def __repr__(self):
         return str(list(self.athletes.keys()))
@@ -124,6 +125,17 @@ class AthleteDB:
         for parkrun_table in parkrun_db.tables.values():
             for parkrun_entry in parkrun_table.table:
                 if parkrun_entry.name not in self.athletes:
-                    self.add_athlete(Athlete(parkrun_entry.name))
+                    self.add_athlete(Athlete(parkrun_entry.name,
+                                             parkrun_entry.club))
                 self.athletes[parkrun_entry.name].add_entry(parkrun_entry)
 
+    def league_table(self):
+        '''Print the attendance and PB of each athlete.'''
+        attending = 2
+        PBed = 3
+        tbl = [["Name", "Club", "Attendance", "PB", "Score"]]
+        for athlete in self.athletes.values():
+            tbl.append([athlete.name, athlete.club, athlete.attendance(),
+                        athlete.PB(), athlete.attendance() * attending +
+                        athlete.PB() * PBed])
+        return tbl

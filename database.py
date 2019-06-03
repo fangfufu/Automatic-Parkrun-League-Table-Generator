@@ -6,7 +6,9 @@ This is a part of Automatic Parkrun League Table Generator
 Dedicated to UEA Triathlon Club
 """
 
+import random
 import sys
+import time
 from collections import OrderedDict
 from table import ParkrunEntry, ParkrunTable
 
@@ -17,10 +19,10 @@ class AthleteDoesNotExist(Exception):
     pass
 
 class ParkrunDB:
-    def __init__(self, loc, club_names, eid_start, eid_end):
+    def __init__(self, loc, eid_start, eid_end, delay=5):
         self.loc = loc
-        self.club_names = club_names
-        self.tables = {}
+        self.tables = OrderedDict()
+        self.delay = delay
         # eid_end + 1 to compensate for the way range works.
         for eid in range(eid_start, eid_end + 1):
             self.add(eid)
@@ -33,7 +35,11 @@ class ParkrunDB:
 
     def add(self, eid):
         if eid not in self.tables:
-            self.tables[eid] = ParkrunTable(self.loc, self.club_names, eid)
+            self.tables[eid] = ParkrunTable(self.loc, eid)
+            actual_delay = random.randint(1, self.delay)
+            time.sleep(actual_delay)
+            print("ParkrunDB [" + self.loc + "]: delaying " + str(actual_delay)
+                  + "secs", file = sys.stderr)
         else:
             print("ParkrunDB [" + self.loc + "] eid [" + str(eid) +
                   "] already exists.", file = sys.stderr)
@@ -42,9 +48,14 @@ class ParkrunDB:
         self.tables.clear()
 
     def update(self):
-        table = ParkrunTable(self.loc, self.club_names, "latest")
+        table = ParkrunTable(self.loc, "latest")
+        self.tables = OrderedDict(sorted(self.tables.items(),
+                                         key = lambda x : x[0]))
         if table.eid not in self.tables:
-            self.tables[table.eid] = table
+            for eid in range(
+                list(self.tables.items())[len(self.tables) - 1][0] + 1,
+                                                           table.eid + 1):
+                self.add(eid)
         else:
             print("ParkrunDB [" + self.loc + "] already up-to-date.",
                   file = sys.stderr)

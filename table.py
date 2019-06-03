@@ -54,9 +54,10 @@ class ParkrunTable:
         eid(int): the Parkrun even number
 
     Attributes:
-        table (list): List of Parkrun result entries.
+        entries (list): List of Parkrun result entries.
     '''
-    def __init__(self, loc, club_names, eid):
+    # NOTE add function to get the fastest athlete for each club
+    def __init__(self, loc, eid):
         def get_URL_content(url):
             """Get the content of a URL."""
             # Custom user-agent because Parkrun doesn't like webscraping.
@@ -72,7 +73,7 @@ class ParkrunTable:
                                     str(r.status_code))
             return r.text
 
-        def soup_to_table(loc, eid, date, soup):
+        def soup_to_entries(loc, eid, date, soup):
             def html_table_to_list_table(html_table):
                 list_table = []
                 for html_row in html_table.findAll('tr'):
@@ -83,22 +84,22 @@ class ParkrunTable:
                     list_table.append(row)
                 return list_table
 
-            def filter_by_club(table_row):
-                # Club name is always at the 8th column
-                club = 7
+            def remove_unknown(table_row):
+                # name is always at the 2nd column
+                name = 1
                 if not table_row:
                     return False
-                if table_row[club] in club_names:
-                    return True
-                else:
+                if table_row[name] == "Unknown":
                     return False
+                else:
+                    return True
 
             html_table = soup.find(id="results")
             if html_table == None:
                 raise TableNotFound("Result table not found!")
 
             list_table = html_table_to_list_table(html_table)
-            filtered_table = list(filter(filter_by_club, list_table))
+            filtered_table = list(filter(remove_unknown, list_table))
 
             entries = []
             for i in filtered_table:
@@ -133,10 +134,10 @@ class ParkrunTable:
         self.date = date(int(date_str.split('/')[2]),
                          int(date_str.split('/')[1]),
                          int(date_str.split('/')[0]))
-        self.table = soup_to_table(self.loc, self.eid, self.date, soup)
+        self.entries = soup_to_entries(self.loc, self.eid, self.date, soup)
 
     def __repr__(self):
         txt = "loc: " + self.loc + ", eid: " + str(self.eid) + "\n"
-        for i in self.table:
+        for i in self.entries:
             txt += str(i) + "\n"
         return txt

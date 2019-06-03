@@ -35,6 +35,7 @@ class ParkrunEntry:
         self.loc = loc
         self.eid = eid
         self.date = date
+        self.fastest = False
 
     def __repr__(self):
         txt = "|" + str(self.date) + ", " + self.loc + ", " + str(self.eid)
@@ -74,15 +75,15 @@ class ParkrunTable:
             return r.text
 
         def soup_to_entries(loc, eid, date, soup):
-            def html_table_to_list_table(html_table):
-                list_table = []
+            def html_table_to_entry_list(html_table):
+                entry_list = []
                 for html_row in html_table.findAll('tr'):
                     html_col = html_row.findAll('td')
                     row = []
                     for column in html_col:
                         row.append(column.text)
-                    list_table.append(row)
-                return list_table
+                    entry_list.append(row)
+                return entry_list
 
             def remove_unknown(table_row):
                 # name is always at the 2nd column
@@ -98,11 +99,11 @@ class ParkrunTable:
             if html_table == None:
                 raise TableNotFound("Result table not found!")
 
-            list_table = html_table_to_list_table(html_table)
-            filtered_table = list(filter(remove_unknown, list_table))
+            entry_list = html_table_to_entry_list(html_table)
+            filtered_list = list(filter(remove_unknown, entry_list))
 
             entries = []
-            for i in filtered_table:
+            for i in filtered_list:
                 entries.append(ParkrunEntry(loc, eid, date, i))
             return entries
 
@@ -141,3 +142,26 @@ class ParkrunTable:
         for i in self.entries:
             txt += str(i) + "\n"
         return txt
+
+    def set_fastest_club_gender(self, clubs):
+        for club in clubs:
+            for gender in ["M", "F"]:
+                def filter_by_club_gender(entry):
+                    if entry.gender == gender and entry.club == club:
+                        return True
+                    else:
+                        return False
+
+                sorted_list = sorted(list(filter(filter_by_club_gender,
+                                                self.entries)),
+                                    key = lambda x : x.time)
+                if not sorted_list:
+                    continue
+                else:
+                    print(sorted_list[0])
+                    name = sorted_list[0].name
+
+                for entry in self.entries:
+                    if entry.name == name:
+                        entry.fastest = True
+

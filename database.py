@@ -19,7 +19,7 @@ class AthleteDoesNotExist(Exception):
     pass
 
 class ParkrunDB:
-    def __init__(self, loc, eid_start, eid_end, delay=5):
+    def __init__(self, loc, eid_start, eid_end, delay=10):
         self.loc = loc
         self.tables = OrderedDict()
         self.delay = delay
@@ -39,7 +39,7 @@ class ParkrunDB:
             actual_delay = random.randint(1, self.delay)
             time.sleep(actual_delay)
             print("ParkrunDB [" + self.loc + "]: delaying " + str(actual_delay)
-                  + "secs", file = sys.stderr)
+                  + " secs", file = sys.stderr)
         else:
             print("ParkrunDB [" + self.loc + "] eid [" + str(eid) +
                   "] already exists.", file = sys.stderr)
@@ -101,6 +101,9 @@ class Athlete:
     def PB(self):
         return [entry.PB for entry in self.entries.values()].count(True)
 
+    def fastest(self):
+        return [entry.fastest for entry in self.entries.values()].count(True)
+
     def loc(self):
         return [entry.loc for entry in self.entries.values()]
 
@@ -140,6 +143,7 @@ class AthleteDB:
 
     def populate(self, parkrun_db):
         for parkrun_table in parkrun_db.tables.values():
+            parkrun_table.set_fastest_club_gender(self.clubs)
             for entry in parkrun_table.entries:
                 if entry.club not in self.clubs:
                     continue
@@ -150,15 +154,18 @@ class AthleteDB:
 
     def league_table(self):
         '''Print the attendance and PB of each athlete.'''
-        attending_score = 2
+        attendance_score = 2
         PB_score = 3
-        tbl = [["Name", "Club", "Attendance", "PB", "Score"]]
+        fastest_score = 3
+        tbl = [["Name", "Club", "Attendance", "PB", "Fastest", "Score"]]
         tbl_content = [];
         for athlete in self.athletes.values():
             tbl_content.append([athlete.name, athlete.club,
                                 athlete.attendance(), athlete.PB(),
-                                athlete.attendance() * attending_score +
-                                athlete.PB() * PB_score])
+                                athlete.fastest(),
+                                athlete.attendance() * attendance_score +
+                                athlete.PB() * PB_score +
+                                athlete.fastest() * fastest_score])
         # The 5th column is the parkrun score.
         tbl_content = sorted(tbl_content, key = lambda x : x[4], reverse=True)
         tbl.extend(tbl_content)

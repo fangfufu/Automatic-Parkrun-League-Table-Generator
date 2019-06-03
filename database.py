@@ -37,9 +37,9 @@ class ParkrunDB:
         if eid not in self.tables:
             self.tables[eid] = ParkrunTable(self.loc, eid)
             actual_delay = random.randint(1, self.delay)
-            time.sleep(actual_delay)
             print("ParkrunDB [" + self.loc + "]: delaying " + str(actual_delay)
                   + " secs", file = sys.stderr)
+            time.sleep(actual_delay)
         else:
             print("ParkrunDB [" + self.loc + "] eid [" + str(eid) +
                   "] already exists.", file = sys.stderr)

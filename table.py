@@ -23,7 +23,10 @@ class ParkrunEntry:
         self.name = entry[1]
         self.time = timestr_to_sec(entry[2])
         self.age_cat = entry[3]
-        self.age_grade = float(entry[4].split(' ')[0])
+        try:
+            self.age_grade = float(entry[4].split(' ')[0])
+        except ValueError:
+            pass
         self.gender = entry[5]
         self.gender_pos = int(entry[6])
         self.club = entry[7]
@@ -57,7 +60,6 @@ class ParkrunTable:
     Attributes:
         entries (list): List of Parkrun result entries.
     '''
-    # NOTE add function to get the fastest athlete for each club
     def __init__(self, loc, eid):
         def get_URL_content(url):
             """Get the content of a URL."""
@@ -103,8 +105,8 @@ class ParkrunTable:
             filtered_list = list(filter(remove_unknown, entry_list))
 
             entries = []
-            for i in filtered_list:
-                entries.append(ParkrunEntry(loc, eid, date, i))
+            for entry in filtered_list:
+                entries.append(ParkrunEntry(loc, eid, date, entry))
             return entries
 
         # Generate the URL

@@ -7,8 +7,10 @@ I will complete the README when I can be bothered. Basically, the idea of Parkru
 To get the league table, run ``test_wrapper.py``
 
 ## TODO
+ - Slicing operator for ParkrunDB
  - A more thorough README
  - Database slicing, so I get to process a subset of the database
  - Individual athlete performance analysis
  - Output to Excel spreadsheet, rather than CSV
  - Output to HTML
+ - SQLite?

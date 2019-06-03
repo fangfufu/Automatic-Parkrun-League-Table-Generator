@@ -110,12 +110,10 @@ class Athlete:
     def attendance(self):
         return len(self.entries)
 
-    # def sort_entries(self):
-    # NOTE: Add function to sort entries by date
-
 class AthleteDB:
-    def __init__(self):
+    def __init__(self, club_names):
         self.athletes = OrderedDict()
+        self.clubs = club_names
 
     def __repr__(self):
         return str(list(self.athletes.keys()))
@@ -142,11 +140,12 @@ class AthleteDB:
 
     def populate(self, parkrun_db):
         for parkrun_table in parkrun_db.tables.values():
-            for parkrun_entry in parkrun_table.table:
-                if parkrun_entry.name not in self.athletes:
-                    self.add_athlete(Athlete(parkrun_entry.name,
-                                             parkrun_entry.club))
-                self.athletes[parkrun_entry.name].add_entry(parkrun_entry)
+            for entry in parkrun_table.entries:
+                if entry.club not in self.clubs:
+                    continue
+                if entry.name not in self.athletes:
+                    self.add_athlete(Athlete(entry.name, entry.club))
+                self.athletes[entry.name].add_entry(entry)
         self.sort_athlete_entries()
 
     def league_table(self):

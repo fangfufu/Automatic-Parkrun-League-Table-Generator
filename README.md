@@ -9,8 +9,6 @@ To get the league table, run ``test_wrapper.py``
 ## TODO
  - A more thorough README
  - Database slicing, so I get to process a subset of the database
- - Implement + 3pts for the fastest UEA Tri/Athletics Male and Female at each Parkrun.
- - Sort the output table
  - Individual athlete performance analysis
  - Output to Excel spreadsheet, rather than CSV
- - GUI
+ - Output to HTML
